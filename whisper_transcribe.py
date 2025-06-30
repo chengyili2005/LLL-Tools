@@ -2,7 +2,7 @@
 # Usage: python3 whisper_transcribe.py [input_directory] [output_directory]
 import os
 import sys
-from faster_whisper import WhisperModel # pip install faster-whisper
+from faster_whisper import WhisperModel # pip3 install faster-whisper
 import numpy as np
 
 # Main script
