@@ -1,11 +1,6 @@
-# Usage: Run this script on a datavyu file within the directory of all the datavyu files you want to export.
-# This script only exports "by frame".
-
-# NOTE:
-# - Transcripts must be named: Gesture[ID]_[Condition].txt
-# - Datavyu files must be named: Gesture_[ID]_[Condition].txt
-# - Both files must be in a folder called: Girdi in the Desktop directory
-# - Must have directories on your Desktop called "input" and "output"
+# Usage: Run this script on a datavyu file within "input" directory (the directory of all the datavyu files you want to export).
+# - Note: This input directory must be on your desktop
+# - Note: This script only exports "by frame".
 
 require 'Datavyu_API.rb'
 require 'csv'
