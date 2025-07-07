@@ -1,5 +1,8 @@
 # Simple command line interface for bulk transcribing with whisper into transcript files
 # Usage: python3 whisper_transcribe.py [input_directory] [output_directory]
+# Description: 
+# - This script opens the [input_directory] and grabs all supported files (.mp3) and converts them into transcripts.
+# - Transcripts are formatted the same as Praat's single tier text exports.
 import os
 import sys
 from faster_whisper import WhisperModel # pip3 install faster-whisper
