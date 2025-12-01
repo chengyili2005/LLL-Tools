@@ -1,4 +1,13 @@
 input/*
 output/*
-word_level_merging.rb
-whisperx_practice.ipynb
+website/*
+chengyi-mfa/*
+jenna-mfa/*
+VSL/*
+vocalization_review/*
+other_scripts/*
+whisperX.ipynb
+profile-userlocked.ovpn
+.*
+MFA.txt
+openvpn.txt
