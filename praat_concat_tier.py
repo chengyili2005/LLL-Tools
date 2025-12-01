@@ -25,7 +25,11 @@ if __name__ == "__main__":
     tier_name = new_tier_df.loc[0, 'tier']
     new_tier = IntervalTier(name=tier_name, minTime=tg.minTime, maxTime=tg.maxTime)
     for _, row in new_tier_df.iterrows():
-        new_tier.add(row['tmin'], row['tmax'], row['text'])
+        if row['tmin'] < row['tmax']:  # Ensure valid intervals
+            new_tier.add(row['tmin'], row['tmax'], row['text'])
+        else:
+            print(f"Skipping Invalid interval: tmin {row['tmin']} >= tmax {row['tmax']}")
+            continue
     tg.append(new_tier)
 
     # Write file
