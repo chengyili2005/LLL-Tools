@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	with open(input_path, 'r') as f:
 		data = json.load(f)
 
-	# Initialize TextGrid object
+	# Initialize TextGrid object NOTE: Change this name!
 	tg = TextGrid()
 	utterances_tier = IntervalTier(name="WhisperX - Utterances", minTime=tg.minTime, maxTime=tg.maxTime)
 	words_tier = IntervalTier(name="WhisperX - Words", minTime=tg.minTime, maxTime=tg.maxTime)

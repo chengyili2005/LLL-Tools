@@ -19,17 +19,18 @@ if __name__ == "__main__":
     # Read files
     tg = TextGrid()
     tg.read(og_textgrid_path)
-    new_tier_df = pd.read_csv(new_tier_path, sep='\t')
+    new_tier_df = pd.read_csv(new_tier_path, sep='\t', encoding="utf-16")
 
     # Create a new tier & append
     tier_name = new_tier_df.loc[0, 'tier']
     new_tier = IntervalTier(name=tier_name, minTime=tg.minTime, maxTime=tg.maxTime)
     for _, row in new_tier_df.iterrows():
-        if row['tmin'] < row['tmax']:  # Ensure valid intervals
-            new_tier.add(row['tmin'], row['tmax'], row['text'])
-        else:
-            print(f"Skipping Invalid interval: tmin {row['tmin']} >= tmax {row['tmax']}")
-            continue
+        if row['tmin'] and row['tmax'] and row['text']:  # Ensure no missing values
+            if float(row['tmin']) < float(row['tmax']):  # Ensure valid intervals
+                new_tier.add(float(row['tmin']), float(row['tmax']), row['text'])
+            else:
+                print(f"Skipping Invalid interval: tmin {row['tmin']} >= tmax {row['tmax']}")
+                continue
     tg.append(new_tier)
 
     # Write file

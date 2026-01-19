@@ -4,10 +4,10 @@ website/*
 chengyi-mfa/*
 jenna-mfa/*
 VSL/*
-vocalization_review/*
+vocalization/*
 other_scripts/*
-whisperX.ipynb
 profile-userlocked.ovpn
-.*
 MFA.txt
 openvpn.txt
+shign/
+.*
