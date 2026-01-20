@@ -44,5 +44,4 @@ if __name__ == "__main__":
 	tg.append(words_tier)
 	output_path = os.path.join(output_dir, os.path.basename(input_path).replace(".json", ".TextGrid"))
 	tg.write(output_path)
-
 	print("Script done")
