@@ -1,7 +1,7 @@
-from textgrid import TextGrid, IntervalTier
+from textgrid import TextGrid, IntervalTier # pip install textgrid
 import os
 import sys
-import pandas as pd
+import pandas as pd # pip install pandas
 
 # Setup: Ensure you exported the csv files by running: Rscript praat/textgrid_to_csv.r
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         filepath = os.path.join(PATH_DIR, filename)
 
         # Read file
-        df = pd.read_csv(filepath, encoding='UTF-8', delimiter=' ')
+        df = pd.read_csv(filepath, encoding='UTF-8', sep=' ', escapechar='\\')
 
         # Fix overlaps by reverse engineering the textgrid back but without any overlaps
         tg = TextGrid()
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             example_row = group_df.iloc[0]
             new_tier = IntervalTier(name=example_row['tier_name'], minTime=example_row['tier_xmin'], maxTime=example_row['tier_xmax'])
 
-            # Iterate through the interval tier
+            # For interval tiers, iterate through each interval and detect any overlapping ones.
             if example_row['tier_type'] == 'IntervalTier':
                 for index in range(len(group_df) - 1):
                     row = group_df.iloc[index]
@@ -46,18 +46,17 @@ if __name__ == "__main__":
                     text = "" if str(text) == 'nan' else text
                     if xmin and xmax: # Ensure no missing values
                         if float(xmin) < float(xmax):  # Ensure valid intervals
-                            if float(xmax) > float(next_row['xmin']):
+                            if float(xmax) > float(next_row['xmin']): # Ensure no overlaps
                                 midpoint = (xmax + next_row['xmin']) / 2
                                 xmax = midpoint
                                 xmin = midpoint
-                                print(f"Fixed overlap in {row['tier_name']} interval {index}: set boundary to {midpoint}")
-                            else:
-                                try:
-                                    new_tier.add(float(xmin), float(xmax), str(text))
-                                except:
-                                    print(f"Can't add Invalid interval: tmin {row['xmin']} >= tmax {row['xmax']}, {row['text']}")
+                                print(f"Fixed overlap in {row['tier_name']} interval {index}: set boundary to {midpoint}") # If there's an overlap, we set a midpoint as the boundary
+                            try:
+                                new_tier.add(float(xmin), float(xmax), str(text))
+                            except:
+                                print(f"Can't add Invalid interval: tmin {xmin} >= tmax {xmax}, {text}")
                         else:
-                            print(f"Skipping Invalid interval: tmin {row['xmin']} >= tmax {row['xmax']}, {row['text']}")
+                            print(f"Skipping Invalid interval: tmin {xmin} >= tmax {xmax}, {text}")
 
             # For other tiers, just add it
             else:
@@ -70,13 +69,13 @@ if __name__ == "__main__":
                         if float(xmin) < float(xmax):  # Ensure valid intervals
                             new_tier.add(float(xmin), float(xmax), str(text))
                         else:
-                            print(f"Skipping Invalid interval: tmin {row['xmin']} >= tmax {row['xmax']}, {row['text']}")
+                            print(f"Skipping Invalid interval: tmin {xmin} >= tmax {xmax}, {text}")
 
-            # Done with a tier
+            # Done with a tier, add it to the textgrid
             tg.append(new_tier)
 
         # Write file
-        output_file = os.path.join(PATH_DIR, f"adjusted_{filename.replace(".csv", ".TextGrid")}")
+        output_file = os.path.join(PATH_DIR, f"Adjusted_{filename.replace(".csv", ".TextGrid")}")
         print(output_file)
         tg.write(output_file)
         print(f"Updated TextGrid saved to: {output_file}\n")

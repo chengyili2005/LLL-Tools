@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .file-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .file-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-input-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .file-input-group input {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        .file-input-group input:hover {
+            border-color: #667eea;
+        }
+
+        .file-input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .player-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .playback-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .segments-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .segment {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            transition: background 0.2s;
+        }
+
+        .segment:hover {
+            background: #f8f9fa;
+        }
+
+        .segment.active {
+            background: #e6f3ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .segment-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .segment-time {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .segment-text {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 60px;
+            transition: border-color 0.2s;
+        }
+
+        .segment-text:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .segment-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .save-section {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status-message.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+
+        @media (max-width: 768px) {
+            .file-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .segment {
+                flex-direction: column;
+            }
+
+            .segment-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .save-section {
+                flex-direction: column;
+            }
+
+            .save-section button {
+                width: 100%;
+            }
+        }
+
+        .segment-index {
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            background: #f0f4ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            width: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Transcription Editor</h1>
+            <p>Load audio file and transcript JSON to edit utterances</p>
+        </div>
+
+        <div class="content">
+            <!-- File Upload Section -->
+            <div class="section">
+                <h2 class="section-title">Load Files</h2>
+                <div class="file-inputs">
+                    <div class="file-input-group">
+                        <label for="audioFile">Audio File (WAV, MP3, etc.)</label>
+                        <input type="file" id="audioFile" accept="audio/*">
+                    </div>
+                    <div class="file-input-group">
+                        <label for="jsonFile">Transcript JSON</label>
+                        <input type="file" id="jsonFile" accept=".json">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Messages -->
+            <div id="statusMessage" class="status-message"></div>
+
+            <!-- Player Section -->
+            <div class="section">
+                <h2 class="section-title">Playback</h2>
+                <div class="player-controls">
+                    <audio id="audioPlayer" controls></audio>
+                    <div class="playback-info">
+                        <span>Current segment: <strong id="currentSegmentIndex">-</strong></span>
+                        <span>Total segments: <strong id="totalSegments">0</strong></span>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn-primary btn-small" onclick="playCurrentSegment()">▶ Play Segment</button>
+                        <button class="btn-secondary btn-small" onclick="playNextSegment()">⏭ Next Segment</button>
+                        <button class="btn-secondary btn-small" onclick="playPreviousSegment()">⏮ Previous Segment</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segments Section -->
+            <div class="section">
+                <h2 class="section-title">Transcript Segments</h2>
+                <div id="segmentsContainer" class="segments-container">
+                    <div class="empty-state">
+                        <p>📄 Load files to see segments here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Section -->
+            <div class="section save-section">
+                <button class="btn-success" onclick="downloadJSON()">💾 Download JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let segments = [];
+        let currentSegmentIndex = -1;
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // File input handlers
+        document.getElementById('audioFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                audioPlayer.src = url;
+                showStatus(`✓ Audio loaded: ${file.name}`, 'success');
+            }
+        });
+
+        document.getElementById('jsonFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.segments && Array.isArray(data.segments)) {
+                            segments = data.segments;
+                            renderSegments();
+                            document.getElementById('totalSegments').textContent = segments.length;
+                            showStatus(`✓ JSON loaded: ${segments.length} segments found`, 'success');
+                        } else {
+                            showStatus('✗ Invalid JSON format. Expected {segments: [...]}', 'error');
+                        }
+                    } catch (error) {
+                        showStatus(`✗ Error parsing JSON: ${error.message}`, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function renderSegments() {
+            const container = document.getElementById('segmentsContainer');
+
+            if (segments.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>📄 No segments loaded</p></div>';
+                return;
+            }
+
+            container.innerHTML = segments.map((segment, index) => `
+                <div class="segment" id="segment-${index}">
+                    <div class="segment-index">${index + 1}</div>
+                    <div class="segment-info">
+                        <div class="segment-time">
+                            ${formatTime(segment.start)} → ${formatTime(segment.end)}
+                        </div>
+                        <textarea class="segment-text" data-index="${index}" placeholder="Enter text...">${segment.text}</textarea>
+                    </div>
+                    <div class="segment-actions">
+                        <button class="btn-primary btn-small" onclick="jumpToAndPlaySegment(${index})">▶ Play</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add event listeners to textareas
+            document.querySelectorAll('.segment-text').forEach(textarea => {
+                textarea.addEventListener('change', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    segments[index].text = e.target.value;
+                });
+            });
+        }
+
+        function formatTime(seconds) {
+            if (typeof seconds !== 'number') {
+                seconds = parseFloat(seconds);
+            }
+            const minutes = Math.floor(seconds / 60);
+            const secs = (seconds % 60).toFixed(2);
+            return `${minutes}:${secs.padStart(5, '0')}`;
+        }
+
+        function jumpToAndPlaySegment(index) {
+            if (index < 0 || index >= segments.length) return;
+
+            currentSegmentIndex = index;
+            const segment = segments[index];
+
+            // Update UI
+            document.querySelectorAll('.segment').forEach(el => el.classList.remove('active'));
+            document.getElementById(`segment-${index}`).classList.add('active');
+            document.getElementById('currentSegmentIndex').textContent = index + 1;
+
+            // Scroll into view
+            document.getElementById(`segment-${index}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Play segment
+            audioPlayer.currentTime = segment.start;
+            audioPlayer.play();
+
+            // Stop at end of segment
+            const stopHandler = () => {
+                if (audioPlayer.currentTime >= segment.end) {
+                    audioPlayer.pause();
+                    audioPlayer.removeEventListener('timeupdate', stopHandler);
+                }
+            };
+            audioPlayer.addEventListener('timeupdate', stopHandler);
+        }
+
+        function playCurrentSegment() {
+            if (currentSegmentIndex >= 0) {
+                jumpToAndPlaySegment(currentSegmentIndex);
+            } else if (segments.length > 0) {
+                jumpToAndPlaySegment(0);
+            } else {
+                showStatus('✗ No segments loaded', 'error');
+            }
+        }
+
+        function playNextSegment() {
+            const nextIndex = currentSegmentIndex + 1;
+            if (nextIndex < segments.length) {
+                jumpToAndPlaySegment(nextIndex);
+            } else {
+                showStatus('✗ No next segment', 'error');
+            }
+        }
+
+        function playPreviousSegment() {
+            const prevIndex = currentSegmentIndex - 1;
+            if (prevIndex >= 0) {
+                jumpToAndPlaySegment(prevIndex);
+            } else {
+                showStatus('✗ No previous segment', 'error');
+            }
+        }
+
+        function downloadJSON() {
+            if (segments.length === 0) {
+                showStatus('✗ No segments to save', 'error');
+                return;
+            }
+
+            // Update segments with latest text values
+            document.querySelectorAll('.segment-text').forEach(textarea => {
+                const index = parseInt(textarea.dataset.index);
+                segments[index].text = textarea.value;
+            });
+
+            const result = {
+                segments: segments
+            };
+
+            const dataStr = JSON.stringify(result, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'transcript_edited.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showStatus('✓ JSON downloaded successfully', 'success');
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message show ${type}`;
+
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusEl.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Update current segment based on playback time
+        audioPlayer.addEventListener('timeupdate', () => {
+            for (let i = 0; i < segments.length; i++) {
+                if (audioPlayer.currentTime >= segments[i].start &&
+                    audioPlayer.currentTime < segments[i].end) {
+                    if (currentSegmentIndex !== i) {
+                        currentSegmentIndex = i;
+                        document.getElementById('currentSegmentIndex').textContent = i + 1;
+                        document.querySelectorAll('.segment').forEach(el => el.classList.remove('active'));
+                        document.getElementById(`segment-${i}`).classList.add('active');
+                    }
+                    break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
