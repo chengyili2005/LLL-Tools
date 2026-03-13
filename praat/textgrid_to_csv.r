@@ -6,7 +6,7 @@
 #########################################################
 
 # NOTE: Change this directory to be where your textgrids are
-inputdir = ("/home/chengyi/Desktop/Projects/LLL-Tools/input/fix")
+inputdir = ("/home/chengyi/Desktop/Projects/LLL-Tools/data/fix")
 
 # NOTE: Ensure these packages are installed
 # install.packages("stringr")
